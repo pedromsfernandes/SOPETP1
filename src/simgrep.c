@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
-#define MAX_OPTIONS 6
-#define MAX_PATTERN_SIZE 101
+#include "macros.h"
 
 int main(int argc, char* argv[])
 {
