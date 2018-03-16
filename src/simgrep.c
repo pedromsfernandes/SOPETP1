@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include "macros.h"
 
 int recursive = 0;
@@ -15,14 +17,25 @@ int invalidArgs()
 
 int validOption(char option)
 {
-    return option == 'i' || option == 'l' || option == 'n'
-                                ||
+    return option == 'i' || option == 'l' || option == 'n' ||
            option == 'c' || option == 'w' || option == 'r';
 }
 
-int main(int argc, char* argv[])
+char *toLowerCase(const char *word)
 {
-    if(argc < 2 || argv[argc - 1][0] == '-')
+    int length = strlen(word);
+    char *lowered = (char *)malloc(length);
+    strcpy(lowered, word);
+
+    for (int i = 0; i < length; i++)
+        lowered[i] = tolower(lowered[i]);
+
+    return lowered;
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc < 2 || argv[argc - 1][0] == '-')
         return invalidArgs();
 
     char options[MAX_OPTIONS][3];
@@ -32,31 +45,33 @@ int main(int argc, char* argv[])
     int i = 1;
     int j = 0;
 
-    for(; i < argc; i++)
+    for (; i < argc; i++)
     {
-        if(argv[i][0] == '-')
-            strcpy(options[j++],argv[i]);
+        if (argv[i][0] == '-')
+            strcpy(options[j++], argv[i]);
 
         else
         {
-            strcpy(pattern,argv[i]);
+            strcpy(pattern, argv[i]);
             i++;
             break;
         }
 
-        if(options[j-1][1] == 'r')
+        if (options[j - 1][1] == 'r')
             recursive = 1;
 
-        else if(!validOption(options[j-1][1]))
+        else if (!validOption(options[j - 1][1]))
         {
-            printf("%s is not a valid option\n",options[j - 1]);
+            printf("%s is not a valid option\n", options[j - 1]);
             return 2;
         }
     }
 
-    if(i < argc - 1)
+    if (i < argc - 1)
         return invalidArgs();
 
-    if(i == argc - 1)
-        strcpy(filedir,argv[i]);
+    if (i == argc - 1)
+        strcpy(filedir, argv[i]);
+
+    return 0;
 }
