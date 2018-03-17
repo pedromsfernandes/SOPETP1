@@ -5,5 +5,6 @@
 #define MAX_PATTERN_SIZE 101
 #define MAX_FILEDIRNAME_SIZE 101
 #define MAX_LINE_SIZE 150
+#define MAX_WORDS_SIZE 50
 
 #endif /* _MACROS_H_ */

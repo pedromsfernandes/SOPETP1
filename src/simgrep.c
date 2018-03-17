@@ -41,6 +41,31 @@ long getFileSize(FILE *file)
     return file_size;
 }
 
+char **decompString(const char *string, int *size)
+{
+    char **decomp = (char **)malloc(MAX_WORDS_SIZE * sizeof(char *));
+    const char delim[] = " ,.-!?\n";
+    char *token;
+    char *temp = (char *)malloc(strlen(string) * sizeof(char *));
+    int i = 0;
+
+    strcpy(temp, string);
+    token = strtok(temp, delim);
+
+    for (; token != NULL; i++)
+    {
+        decomp[i] = (char *)malloc(strlen(token) * sizeof(char));
+        strcpy(decomp[i], token);
+        token = strtok(NULL, delim);
+    }
+
+    decomp = realloc(decomp, i * sizeof(char *));
+    *size = i;
+    free(temp);
+
+    return decomp;
+}
+
 char **findPattern(const char *pattern, const char *filename, int *size)
 {
     FILE *file = fopen(filename, "r");
@@ -71,7 +96,11 @@ char **findPattern(const char *pattern, const char *filename, int *size)
 void printArray(char **arr, int size)
 {
     for (int i = 0; i < size; i++)
+    {
+        if (i > 0)
+            printf("\n");
         printf("%s", arr[i]);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -114,13 +143,13 @@ int main(int argc, char *argv[])
     if (i == argc - 1)
         strcpy(filedir, argv[i]);
 
-    // printf("%s\n", toLowerCase("olACARAlHo"));
+    // printf("%s\n", toLowerCase("eMelhORTEroUtrASTrInG"));
 
     /*
     int size = 0;
     char **s = findPattern("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt", &size);
     printArray(s, size);
-    */
+    */  
 
     return 0;
 }
