@@ -21,16 +21,57 @@ int validOption(char option)
            option == 'c' || option == 'w' || option == 'r';
 }
 
-char *toLowerCase(const char *word)
+char *toLowerCase(const char *string)
 {
-    int length = strlen(word);
+    int length = strlen(string);
     char *lowered = (char *)malloc(length);
-    strcpy(lowered, word);
 
     for (int i = 0; i < length; i++)
-        lowered[i] = tolower(lowered[i]);
+        lowered[i] = tolower(string[i]);
 
     return lowered;
+}
+
+long getFileSize(FILE *file)
+{
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    return file_size;
+}
+
+char **findPattern(const char *pattern, const char *filename, int *size)
+{
+    FILE *file = fopen(filename, "r");
+    char line[MAX_LINE_SIZE];
+    long filesize = getFileSize(file);
+    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    int i = 0;
+
+    while (1)
+    {
+        if (fgets(line, MAX_LINE_SIZE - 1, file) == NULL)
+            break;
+
+        if (strstr(line, pattern) != NULL)
+        {
+            foundLines[i] = (char *)malloc(strlen(line));
+            strcpy(foundLines[i++], line);
+        }
+    }
+
+    fclose(file);
+    foundLines = realloc(foundLines, i * sizeof(char *));
+    *size = i;
+
+    return foundLines;
+}
+
+void printArray(char **arr, int size)
+{
+    for (int i = 0; i < size; i++)
+        printf("%s", arr[i]);
 }
 
 int main(int argc, char *argv[])
@@ -72,6 +113,14 @@ int main(int argc, char *argv[])
 
     if (i == argc - 1)
         strcpy(filedir, argv[i]);
+
+    // printf("%s\n", toLowerCase("olACARAlHo"));
+
+    /*
+    int size = 0;
+    char **s = findPattern("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt", &size);
+    printArray(s, size);
+    */
 
     return 0;
 }
