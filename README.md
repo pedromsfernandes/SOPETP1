@@ -10,7 +10,7 @@ The purpose is to write a UNIX command line application similar to `grep` called
 ```
 $ simgrep [options] pattern [file/dir]
 ```
-
+***
 Where options can be one of the following:
 - **-i** ignores the letter case (upper or lower).
 - **-l** shows only the file names.
@@ -20,5 +20,5 @@ Where options can be one of the following:
 - **-r** the pattern is looked for in every file under the tree of the specified directory.
 
 If no file or directory is specified, the pattern in looked for in the input stream, meaning the input text has to be sent through the terminal.
-
+***
 More specifications can be found [here](SOPETP1/enunciado.pdf) (in portuguese).
