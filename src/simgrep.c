@@ -24,7 +24,7 @@ int validOption(char option)
 char *toLowerCase(const char *string)
 {
     int length = strlen(string);
-    char *lowered = (char *)malloc(length);
+    char *lowered = (char *)malloc(length + 1);
 
     for (int i = 0; i < length; i++)
         lowered[i] = tolower(string[i]);
@@ -44,18 +44,18 @@ long getFileSize(FILE *file)
 char **decompString(const char *string, int *size)
 {
     char **decomp = (char **)malloc(MAX_WORDS_SIZE * sizeof(char *));
-    const char delim[] = " ,.-!?\n";
+    const char delim[] = " ,.!?\n";
     char *token;
-    char *temp = (char *)malloc(strlen(string) * sizeof(char *));
+    char *temp = (char *)malloc(strlen(string) + 1);
     int i = 0;
 
-    strcpy(temp, string);
+    strncpy(temp, string, strlen(string) + 1);
     token = strtok(temp, delim);
 
     for (; token != NULL; i++)
     {
-        decomp[i] = (char *)malloc(strlen(token) * sizeof(char));
-        strcpy(decomp[i], token);
+        decomp[i] = (char *)malloc((strlen(token) + 1));
+        strncpy(decomp[i], token, strlen(token) + 1);
         token = strtok(NULL, delim);
     }
 
@@ -66,6 +66,36 @@ char **decompString(const char *string, int *size)
     return decomp;
 }
 
+char **findPatternLines(const char *pattern, const char *filename, int *size)
+{
+    FILE *file = fopen(filename, "r");
+    char line[MAX_LINE_SIZE];
+    long filesize = getFileSize(file);
+    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    int i = 0;
+    int lineNumber = 1;
+    char str[MAX_LINE_SIZE + 5];
+
+    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    {
+        if (strstr(line, pattern) != NULL)
+        {
+            sprintf(str, "%d:", lineNumber);
+            strcat(str, line);
+            foundLines[i] = (char *)malloc(strlen(str) + 1);
+            strcpy(foundLines[i++], str);
+        }
+
+        lineNumber++;
+    }
+
+    fclose(file);
+    foundLines = realloc(foundLines, i * sizeof(char *));
+    *size = i;
+
+    return foundLines;
+}
+
 char **findPattern(const char *pattern, const char *filename, int *size)
 {
     FILE *file = fopen(filename, "r");
@@ -73,17 +103,98 @@ char **findPattern(const char *pattern, const char *filename, int *size)
     long filesize = getFileSize(file);
     char **foundLines = (char **)malloc(filesize * sizeof(char *));
     int i = 0;
+    int lineLength = 0;
 
-    while (1)
+    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
     {
-        if (fgets(line, MAX_LINE_SIZE - 1, file) == NULL)
-            break;
-
         if (strstr(line, pattern) != NULL)
         {
-            foundLines[i] = (char *)malloc(strlen(line));
-            strcpy(foundLines[i++], line);
+            lineLength = strlen(line) + 1;
+            foundLines[i] = (char *)malloc(lineLength);
+            strncpy(foundLines[i++], line, lineLength);
         }
+    }
+
+    fclose(file);
+    foundLines = realloc(foundLines, i * sizeof(char *));
+    *size = i;
+
+    return foundLines;
+}
+
+char **findPatternIgnore(const char *pattern, const char *filename, int *size)
+{
+    FILE *file = fopen(filename, "r");
+    char line[MAX_LINE_SIZE];
+    long filesize = getFileSize(file);
+    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    char *lowered = toLowerCase(pattern);
+    int lineLength = 0;
+    int i = 0;
+
+    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    {
+        char *loweredLine = toLowerCase(line);
+        if (strstr(loweredLine, lowered) != NULL)
+        {
+            lineLength = strlen(line) + 1;
+            foundLines[i] = (char *)malloc(lineLength);
+            strncpy(foundLines[i++], line, lineLength);
+        }
+
+        free(loweredLine);
+    }
+
+    free(lowered);
+    fclose(file);
+    foundLines = realloc(foundLines, i * sizeof(char *));
+    *size = i;
+
+    return foundLines;
+}
+
+int findPatternCount(const char *pattern, const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    char line[MAX_LINE_SIZE];
+    int counter = 0;
+
+    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+        if (strstr(line, pattern) != NULL)
+            counter++;
+
+    fclose(file);
+
+    return counter;
+}
+
+char **findPatternWord(const char *pattern, const char *filename, int *size)
+{
+    FILE *file = fopen(filename, "r");
+    char line[MAX_LINE_SIZE];
+    long filesize = getFileSize(file);
+    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    char **splitLine;
+    int i = 0;
+    int splitLineSize = 0;
+    int lineLength = 0;
+
+    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    {
+        splitLine = decompString(line, &splitLineSize);
+
+        for (int j = 0; j < splitLineSize; j++)
+        {
+            if (strcmp(splitLine[j], pattern) == 0)
+            {
+                lineLength = strlen(line) + 1;
+                foundLines[i] = (char *)malloc(lineLength);
+                strncpy(foundLines[i++], line, lineLength);
+                break;
+            }
+        }
+
+        free(splitLine);
     }
 
     fclose(file);
@@ -143,13 +254,13 @@ int main(int argc, char *argv[])
     if (i == argc - 1)
         strcpy(filedir, argv[i]);
 
-    // printf("%s\n", toLowerCase("eMelhORTEroUtrASTrInG"));
-
     /*
     int size = 0;
     char **s = findPattern("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt", &size);
+    int n = findPatternCount("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt");
+    printf("%d\n", n);
     printArray(s, size);
-    */  
+    */
 
     return 0;
 }
