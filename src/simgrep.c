@@ -262,10 +262,11 @@ int main(int argc, char *argv[])
 
         struct stat path_stat;
         stat(filedir, &path_stat);
+        if(S_ISDIR(path_stat.st_mode))
+            hasdir = 1;
+
         if(S_ISREG(path_stat.st_mode))
             hasfile = 1;
-
-        else hasdir = 1;
     }
 
     if(hasdir && !recursive)
