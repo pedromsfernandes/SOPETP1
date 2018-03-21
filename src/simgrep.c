@@ -1,16 +1,17 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "macros.h"
 
-int recursive = 0;
-
 int invalidArgs()
 {
-    printf("Invalid arguments!\n");
-    printf("Usage: simgrep [options] pattern [file/dir]\n");
-    printf("Valid options: -i -l -n -c -w -r\n");
+    printf("simgrep: Invalid arguments!\n");
+    printf("simgrep: Usage: simgrep [options] pattern [file/dir]\n");
+    printf("simgrep: Valid options: -i -l -n -c -w -r\n");
 
     return 1;
 }
@@ -219,6 +220,10 @@ int main(int argc, char *argv[])
     if (argc < 2 || argv[argc - 1][0] == '-')
         return invalidArgs();
 
+    int recursive = 0;
+    int hasdir = 0;
+    int hasfile = 0;
+
     char options[MAX_OPTIONS][3];
     char pattern[MAX_PATTERN_SIZE];
     char filedir[MAX_FILEDIRNAME_SIZE];
@@ -252,7 +257,22 @@ int main(int argc, char *argv[])
         return invalidArgs();
 
     if (i == argc - 1)
+    {
         strcpy(filedir, argv[i]);
+
+        struct stat path_stat;
+        stat(filedir, &path_stat);
+        if(S_ISREG(path_stat.st_mode))
+            hasfile = 1;
+
+        else hasdir = 1;
+    }
+
+    if(hasdir && !recursive)
+    {
+        printf("simgrep: %s: Is a directory\n", filedir);
+        return 2;
+    }
 
     /*
     int size = 0;
