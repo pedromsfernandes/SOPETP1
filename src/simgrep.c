@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "macros.h"
 #include "findPattern.h"
+#include <dirent.h>
 
 int invalidArgs()
 {
@@ -80,26 +81,43 @@ int main(int argc, char *argv[])
 
         struct stat path_stat;
         stat(filedir, &path_stat);
-        if(S_ISDIR(path_stat.st_mode))
+        if (S_ISDIR(path_stat.st_mode))
             hasdir = 1;
 
-        if(S_ISREG(path_stat.st_mode))
+        if (S_ISREG(path_stat.st_mode))
             hasfile = 1;
     }
 
-    if(hasdir && !recursive)
+    if (hasdir && !recursive)
     {
         printf("simgrep: %s: Is a directory\n", filedir);
         return 2;
     }
 
-    
     int size = 0;
-    char **s = findPattern(pattern, NULL, &size);
-   // int n = findPatternCount("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt");
+    char **s = findPatternLines(pattern, filedir, &size);
+    // int n = findPatternCount("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt");
     //printf("%d\n", n);
     printArray(s, size);
-    
+
+    if (hasdir)
+    {
+        char filesInDir[MAX_FILES_IN_DIR][MAX_FILE_NAME];
+        int i = 0;
+        DIR *d;
+        struct dirent *dir;
+        d = opendir(filedir);
+
+        if (d)
+        {
+            while ((dir = readdir(d) )!= NULL)
+            {
+                strncpy(filesInDir[i++], dir->d_name, MAX_FILE_NAME -1);
+            }
+
+            closedir(d);
+        }
+    }
 
     return 0;
 }
