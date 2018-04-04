@@ -24,14 +24,36 @@ int validOption(char option)
            option == 'c' || option == 'w' || option == 'r';
 }
 
-void printArray(char **arr, int size)
+void printArray(char **arr)
 {
-    for (int i = 0; i < size; i++)
+    for (int i = 0; arr[i] != NULL; i++)
     {
         if (i > 0)
             printf("\n");
         printf("%s", arr[i]);
     }
+}
+
+//Returns -1 is not found, 0 is file, 1 if direcorty
+int isFileorDir(char path[])
+{
+    struct stat path_stat;
+
+    if (stat(path, &path_stat) < 0)
+        return -1;
+
+    if (S_ISDIR(path_stat.st_mode))
+        return 1;
+
+    if (S_ISREG(path_stat.st_mode))
+        return 0;
+
+    return -1;
+}
+
+void fileNotFound(char filedir[])
+{
+    printf("simgrep: File %s not found\n", filedir);
 }
 
 int main(int argc, char *argv[])
@@ -43,7 +65,7 @@ int main(int argc, char *argv[])
     int hasdir = 0;
     int hasfile = 0;
 
-    char options[MAX_OPTIONS][3];
+    char options[MAX_OPTIONS];
     char pattern[MAX_PATTERN_SIZE];
     char filedir[MAX_FILEDIRNAME_SIZE];
 
@@ -53,7 +75,7 @@ int main(int argc, char *argv[])
     for (; i < argc; i++)
     {
         if (argv[i][0] == '-')
-            strcpy(options[j++], argv[i]);
+            options[j++] = argv[i][1];
 
         else
         {
@@ -62,12 +84,12 @@ int main(int argc, char *argv[])
             break;
         }
 
-        if (options[j - 1][1] == 'r')
+        if (options[j - 1] == 'r')
             recursive = 1;
 
-        else if (!validOption(options[j - 1][1]))
+        else if (!validOption(options[j - 1]))
         {
-            printf("%s is not a valid option\n", options[j - 1]);
+            printf("-%c is not a valid option\n", options[j - 1]);
             return 2;
         }
     }
@@ -79,28 +101,31 @@ int main(int argc, char *argv[])
     {
         strcpy(filedir, argv[i]);
 
-        struct stat path_stat;
-        stat(filedir, &path_stat);
-        if (S_ISDIR(path_stat.st_mode))
+        int fileordir = isFileorDir(filedir);
+
+        if (fileordir == 1)
             hasdir = 1;
 
-        if (S_ISREG(path_stat.st_mode))
+        if (!fileordir)
             hasfile = 1;
+
+        else
+        {
+            fileNotFound(filedir);
+            return 2;
+        }
     }
 
-    if (hasdir && !recursive)
-    {
-        printf("simgrep: %s: Is a directory\n", filedir);
-        return 2;
-    }
+    if (hasfile)
+        return findPatternInFile(pattern, filedir, options);
 
-    int size = 0;
-    char **s = findPatternLines(pattern, filedir, &size);
+    //int size = 0;
+    //char **s = findPatternLines(pattern, filedir, &size);
     // int n = findPatternCount("chair", "/home/zephyrminas/Documentos/SOPETP1/files/pg174.txt");
     //printf("%d\n", n);
-    printArray(s, size);
+    //printArray(s, size);
 
-    if (hasdir)
+    else if (hasdir)
     {
         char filesInDir[MAX_FILES_IN_DIR][MAX_FILE_NAME];
         int i = 0;
@@ -110,9 +135,9 @@ int main(int argc, char *argv[])
 
         if (d)
         {
-            while ((dir = readdir(d) )!= NULL)
+            while ((dir = readdir(d)) != NULL)
             {
-                strncpy(filesInDir[i++], dir->d_name, MAX_FILE_NAME -1);
+                strncpy(filesInDir[i++], dir->d_name, MAX_FILE_NAME - 1);
             }
 
             closedir(d);

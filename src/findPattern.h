@@ -2,8 +2,6 @@
 #ifndef _FINDPATTERN_H_
 #define _FINDPATTERN_H_
 
-char **findPattern(const char *pattern, const char *filename, int *size);
-
-char **findPatternLines(const char *pattern, const char *filename, int *size);
+int findPatternInFile(const char *pattern, const char *filename, const char *options);
 
 #endif /* _FINDPATTERN_H_*/
