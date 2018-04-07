@@ -8,5 +8,5 @@
 #define MAX_WORDS_SIZE 50
 #define MAX_FILES_IN_DIR 50
 #define MAX_FILE_NAME 21
-
+#define MAX_FILE_SIZE 2000
 #endif /* _MACROS_H_ */

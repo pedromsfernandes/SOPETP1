@@ -5,6 +5,24 @@
 #include "macros.h"
 #include "findPattern.h"
 
+char **readFile(const char *filename)
+{
+    FILE *file;
+    char line[MAX_LINE_SIZE];
+    char **lines = malloc(MAX_FILE_SIZE * sizeof(char *));
+    int i = 0;
+
+    file = filename != NULL ? fopen(filename, "r") : stdin;
+
+    for (; fgets(line, MAX_LINE_SIZE - 1, file) != NULL; i++)
+    {
+    }
+
+    lines = realloc(lines, i * sizeof(char *));
+    fclose(file);
+    return lines;
+}
+
 char *toLowerCase(const char *string)
 {
     int length = strlen(string);
@@ -14,15 +32,6 @@ char *toLowerCase(const char *string)
         lowered[i] = tolower(string[i]);
 
     return lowered;
-}
-
-long getFileSize(FILE *file)
-{
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    return file_size;
 }
 
 char **decompString(const char *string, int *size)
@@ -50,17 +59,15 @@ char **decompString(const char *string, int *size)
     return decomp;
 }
 
-char **findPatternLines(const char *pattern, const char *filename)
+char **findPatternLines(const char *pattern, char **lines)
 {
-    FILE *file = fopen(filename, "r");
-    char line[MAX_LINE_SIZE];
-    long filesize = getFileSize(file);
-    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    char **foundLines = (char **)malloc(MAX_FILE_SIZE * sizeof(char *));
     int i = 0;
     int lineNumber = 1;
     char str[MAX_LINE_SIZE + 5];
+    char line[MAX_LINE_SIZE];
 
-    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    while (strcpy(line, lines[lineNumber - 1]) != NULL)
     {
         if (strstr(line, pattern) != NULL)
         {
@@ -73,34 +80,18 @@ char **findPatternLines(const char *pattern, const char *filename)
         lineNumber++;
     }
 
-    fclose(file);
     foundLines = realloc(foundLines, i * sizeof(char *));
-
     return foundLines;
 }
 
-char **findPattern(const char *pattern, const char *filename)
+char **findPattern(const char *pattern, char **lines)
 {
-    FILE *file;
-    char **foundLines;
-    long filesize;
-    if (filename != NULL)
-    {
-        file = fopen(filename, "r");
-        filesize = getFileSize(file);
-        foundLines = (char **)malloc(filesize * sizeof(char *));
-    }
-    else
-    {
-        file = stdin;
-        filesize = 100;
-        foundLines = (char **)malloc(filesize * sizeof(char *));
-    }
-    char line[MAX_LINE_SIZE];
+    char **foundLines = (char **)malloc(MAX_FILE_SIZE * sizeof(char *));
     int i = 0;
     int lineLength = 0;
+    char line[MAX_LINE_SIZE];
 
-    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    for (int j = 0; strcpy(line, lines[j]) != NULL; j++)
     {
         if (strstr(line, pattern) != NULL)
         {
@@ -110,23 +101,19 @@ char **findPattern(const char *pattern, const char *filename)
         }
     }
 
-    fclose(file);
     foundLines = realloc(foundLines, i * sizeof(char *));
-
     return foundLines;
 }
 
-char **findPatternIgnore(const char *pattern, const char *filename, int *hasPattern)
+char **findPatternIgnore(const char *pattern, char **lines, int *hasPattern)
 {
-    FILE *file = fopen(filename, "r");
     char line[MAX_LINE_SIZE];
-    long filesize = getFileSize(file);
-    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    char **foundLines = (char **)malloc(MAX_FILE_SIZE * sizeof(char *));
     char *lowered = toLowerCase(pattern);
     int lineLength = 0;
     int i = 0;
 
-    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    for (int j = 0; strcpy(line, lines[j]) != NULL; j++)
     {
         char *loweredLine = toLowerCase(line);
         if (strstr(loweredLine, lowered) != NULL)
@@ -147,39 +134,33 @@ char **findPatternIgnore(const char *pattern, const char *filename, int *hasPatt
     }
 
     free(lowered);
-    fclose(file);
     foundLines = realloc(foundLines, i * sizeof(char *));
 
     return foundLines;
 }
 
-int findPatternCount(const char *pattern, const char *filename)
+int findPatternCount(const char *pattern, char **lines)
 {
-    FILE *file = fopen(filename, "r");
     char line[MAX_LINE_SIZE];
     int counter = 0;
 
-    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    for (int j = 0; lines[j] != NULL; j++)
         if (strstr(line, pattern) != NULL)
             counter++;
-
-    fclose(file);
 
     return counter;
 }
 
-char **findPatternWord(const char *pattern, const char *filename)
+char **findPatternWord(const char *pattern, char **lines)
 {
-    FILE *file = fopen(filename, "r");
     char line[MAX_LINE_SIZE];
-    long filesize = getFileSize(file);
-    char **foundLines = (char **)malloc(filesize * sizeof(char *));
+    char **foundLines = (char **)malloc(MAX_FILE_SIZE * sizeof(char *));
     char **splitLine;
     int i = 0;
     int splitLineSize = 0;
     int lineLength = 0;
 
-    while (fgets(line, MAX_LINE_SIZE - 1, file) != NULL)
+    for (int c = 0; strcpy(line, lines[c]) != NULL; c++)
     {
         splitLine = decompString(line, &splitLineSize);
 
@@ -197,7 +178,6 @@ char **findPatternWord(const char *pattern, const char *filename)
         free(splitLine);
     }
 
-    fclose(file);
     foundLines = realloc(foundLines, i * sizeof(char *));
 
     return foundLines;
@@ -231,7 +211,8 @@ int findPatternInFile(const char *pattern, const char *filename, const char *opt
         if (hasI)
         {
             int hasPatternIgnore = 0;
-            findPatternIgnore(pattern, filename, &hasPatternIgnore);
+            char **lines = readFile(filename);
+            findPatternIgnore(pattern, lines, &hasPatternIgnore);
             if (hasPatternIgnore)
                 printf("%s\n", filename);
 
