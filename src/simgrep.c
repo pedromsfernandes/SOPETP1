@@ -24,16 +24,6 @@ int validOption(char option)
            option == 'c' || option == 'w' || option == 'r';
 }
 
-void printArray(char **arr)
-{
-    for (int i = 0; arr[i] != NULL; i++)
-    {
-        if (i > 0)
-            printf("\n");
-        printf("%s", arr[i]);
-    }
-}
-
 //Returns -1 is not found, 0 is file, 1 if direcorty
 int isFileorDir(char path[])
 {
@@ -143,6 +133,8 @@ int main(int argc, char *argv[])
             closedir(d);
         }
     }
+    else
+        return findPatternInFile(pattern, NULL, options);
 
     return 0;
 }
