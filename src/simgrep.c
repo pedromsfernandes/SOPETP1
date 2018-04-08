@@ -28,7 +28,6 @@ int validOption(char option)
 int isFileorDir(char path[])
 {
     struct stat path_stat;
-
     if (stat(path, &path_stat) < 0)
         return -1;
 
@@ -90,13 +89,11 @@ int main(int argc, char *argv[])
     if (i == argc - 1)
     {
         strcpy(filedir, argv[i]);
-
         int fileordir = isFileorDir(filedir);
-
         if (fileordir == 1)
             hasdir = 1;
 
-        if (!fileordir)
+        else if (!fileordir)
             hasfile = 1;
 
         else
@@ -117,7 +114,7 @@ int main(int argc, char *argv[])
 
     else if (hasdir)
     {
-        char filesInDir[MAX_FILES_IN_DIR][MAX_FILE_NAME];
+        char **filesInDir = malloc(MAX_FILES_IN_DIR * sizeof(char *));
         int i = 0;
         DIR *d;
         struct dirent *dir;
@@ -127,11 +124,20 @@ int main(int argc, char *argv[])
         {
             while ((dir = readdir(d)) != NULL)
             {
-                strncpy(filesInDir[i++], dir->d_name, MAX_FILE_NAME - 1);
+                filesInDir[i] = malloc(strlen(dir->d_name) + 1);
+                if (strcmp(dir->d_name, "..") != 0 && strcmp(dir->d_name, ".") != 0)
+                    strncpy(filesInDir[i++], dir->d_name, strlen(dir->d_name) + 1);
             }
 
             closedir(d);
         }
+        for (int j = 0; j < i; j++)
+        {
+            //printf("%s\n", filesInDir[j]);
+            findPatternInFile(pattern, filesInDir[j], options);
+        }
+
+        free(filesInDir);
     }
     else
         return findPatternInFile(pattern, NULL, options);

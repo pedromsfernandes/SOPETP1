@@ -242,8 +242,32 @@ int hasOption(const char *options, const char option)
     return 0;
 }
 
+char **appendFileName(char **lines, const char *fileName)
+{
+    char **append = malloc(MAX_FILE_SIZE * sizeof(char *));
+    int i = 0;
+
+    for (; lines[i] != NULL; i++)
+    {
+        char *modLine = malloc(MAX_LINE_SIZE + strlen(fileName) + 4);
+        strncpy(modLine, fileName, strlen(fileName) + 4);
+        strcat(modLine, ": ");
+        strcat(modLine, lines[i]);
+        append[i] = (char *)malloc(strlen(modLine) + 4);
+        strncpy(append[i], modLine, strlen(modLine) + 4);
+        free(modLine);
+    }
+
+    append = realloc(append, (i + 1) * sizeof(char *));
+    append[i] = NULL;
+    return append;
+}
+
 int findPatternInFile(const char *pattern, const char *filename, const char *options)
 {
+    printf("ole");
+    printf("|%s|", filename);
+
     int hasL = hasOption(options, 'l');
     int hasC = hasOption(options, 'c');
     int hasN = hasOption(options, 'n');
@@ -362,6 +386,7 @@ int findPatternInFile(const char *pattern, const char *filename, const char *opt
     else
     {
         lines = findPattern(pattern, lines, NULL);
+        lines = appendFileName(lines, filename);
         printArray(lines);
     }
     free(lines);
