@@ -23,15 +23,16 @@ char **readFile(const char *filename)
     }
 
     lines = realloc(lines, (i + 1) * sizeof(char *));
-    lines[i + 1] = NULL;
+    lines[i] = NULL;
     fclose(file);
     return lines;
 }
 
 void printArray(char **arr)
 {
-    for (int i = 0; arr[i] != NULL; i++)
-        printf("%s", arr[i]);
+    if (arr != NULL)
+        for (int i = 0; arr[i] != NULL; i++)
+            printf("%s", arr[i]);
 }
 
 char *toLowerCase(const char *string)
@@ -94,7 +95,7 @@ char **findPatternLines(const char *pattern, char **lines)
     }
 
     foundLines = realloc(foundLines, (i + 1) * sizeof(char *));
-    foundLines[i + 1] = NULL;
+    foundLines[i] = NULL;
     return foundLines;
 }
 
@@ -105,8 +106,9 @@ char **findPattern(const char *pattern, char **lines, int *hasPattern)
     int lineLength = 0;
     char line[MAX_LINE_SIZE];
 
-    for (int j = 0; strcpy(line, lines[j]) != NULL; j++)
+    for (int j = 0; lines[j] != NULL; j++)
     {
+        strncpy(line, lines[j], strlen(lines[j]) + 1);
         if (strstr(line, pattern) != NULL)
         {
             if (hasPattern)
@@ -122,7 +124,9 @@ char **findPattern(const char *pattern, char **lines, int *hasPattern)
         }
     }
 
-    foundLines = realloc(foundLines, i * sizeof(char *));
+    foundLines = realloc(foundLines, (i + 1) * sizeof(char *));
+    foundLines[i] = NULL;
+
     return foundLines;
 }
 
@@ -136,7 +140,7 @@ char **findPatternIgnore(const char *pattern, char **lines, int *hasPattern)
 
     for (int j = 0; lines[j] != NULL; j++)
     {
-        strncpy(line, lines[j], strlen(lines[j]));
+        strncpy(line, lines[j], strlen(lines[j]) + 1);
         char *loweredLine = toLowerCase(line);
 
         if (strstr(loweredLine, lowered) != NULL)
@@ -163,7 +167,7 @@ char **findPatternIgnore(const char *pattern, char **lines, int *hasPattern)
 
     free(lowered);
     foundLines = realloc(foundLines, (i + 1) * sizeof(char *));
-    foundLines[i + 1] = NULL;
+    foundLines[i] = NULL;
     return foundLines;
 }
 
@@ -171,13 +175,13 @@ int findPatternCount(const char *pattern, char **lines)
 {
     char line[MAX_LINE_SIZE];
     int counter = 0;
-
-    for (int j = 0; lines[j] != NULL; j++)
-    {
-        strncpy(line, lines[j], strlen(lines[j]) + 1);
-        if (strstr(line, pattern) != NULL)
-            counter++;
-    }
+    if (lines != NULL)
+        for (int j = 0; lines[j] != NULL; j++)
+        {
+            strncpy(line, lines[j], strlen(lines[j]) + 1);
+            if (strstr(line, pattern) != NULL)
+                counter++;
+        }
 
     return counter;
 }
@@ -243,12 +247,12 @@ int findPatternInFile(const char *pattern, const char *filename, const char *opt
     int hasL = hasOption(options, 'l');
     int hasC = hasOption(options, 'c');
     int hasN = hasOption(options, 'n');
+    int hasI = hasOption(options, 'i');
+    int hasW = hasOption(options, 'w');
     char **lines = readFile(filename);
+
     if (hasL)
     {
-        int hasI = hasOption(options, 'i');
-        int hasW = hasOption(options, 'w');
-
         if (hasI && hasW)
         {
             int hasPatternIgnore = 0;
@@ -293,8 +297,6 @@ int findPatternInFile(const char *pattern, const char *filename, const char *opt
     }
     else if (hasC)
     {
-        int hasI = hasOption(options, 'i');
-        int hasW = hasOption(options, 'w');
 
         if (hasI && hasW)
         {
@@ -316,10 +318,6 @@ int findPatternInFile(const char *pattern, const char *filename, const char *opt
     }
     else if (hasN)
     {
-
-        int hasI = hasOption(options, 'i');
-        int hasW = hasOption(options, 'w');
-
         if (hasI)
             pattern = toLowerCase(pattern);
 
@@ -342,7 +340,30 @@ int findPatternInFile(const char *pattern, const char *filename, const char *opt
 
         printArray(lines);
     }
+    else if (hasI && hasW)
+    {
+        pattern = toLowerCase(pattern);
+        lines = findPatternIgnore(pattern, lines, NULL);
+        lines = findPatternWord(pattern, lines, NULL);
 
+        printArray(lines);
+    }
+    else if (hasI)
+    {
+        lines = findPatternIgnore(pattern, lines, NULL);
+
+        printArray(lines);
+    }
+    else if (hasW)
+    {
+        lines = findPatternWord(pattern, lines, NULL);
+        printArray(lines);
+    }
+    else
+    {
+        lines = findPattern(pattern, lines, NULL);
+        printArray(lines);
+    }
     free(lines);
 
     return 0;
