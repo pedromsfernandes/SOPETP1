@@ -48,6 +48,41 @@ void fileNotFound(string filedir)
     cout << "simgrep: File " << filedir << " not found!" << endl;
 }
 
+void sweepDir(string pattern, string dirName, string options)
+{
+    int pid = fork();
+
+    if (pid == 0)
+    {
+        vector<string> filesInDir;
+        DIR *d;
+        struct dirent *dir;
+        d = opendir(dirName.c_str());
+        bool hasR = hasOption(options, 'r');
+
+        if (d)
+        {
+            while ((dir = readdir(d)) != NULL)
+            {
+                if (hasR && isFileorDir((dirName + dir->d_name).c_str()))
+                {
+                    sweepDir(dirName + dir->d_name, pattern, options);
+                }
+
+                if (string(dir->d_name) != "." && string(dir->d_name) != "..")
+                    filesInDir.push_back(dirName + dir->d_name);
+            }
+
+            closedir(d);
+        }
+
+        for (unsigned int j = 0; j < filesInDir.size(); j++)
+        {
+            findPatternInFile(pattern, filesInDir[j], options, true);
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2 || argv[argc - 1][0] == '-')
@@ -111,27 +146,7 @@ int main(int argc, char *argv[])
     }
     else if (hasdir)
     {
-
-        vector<string> filesInDir;
-        DIR *d;
-        struct dirent *dir;
-        d = opendir(filedir.c_str());
-
-        if (d)
-        {
-            while ((dir = readdir(d)) != NULL)
-            {
-                if (string(dir->d_name) != "." && string(dir->d_name) != "..")
-                    filesInDir.push_back(filedir + dir->d_name);
-            }
-
-            closedir(d);
-        }
-
-        for (unsigned int j = 0; j < filesInDir.size(); j++)
-        {
-            findPatternInFile(pattern, filesInDir[j], options, true);
-        }
+        sweepDir(pattern, filedir, options);
     }
     else
         return findPatternInFile(pattern, "", options, false);
