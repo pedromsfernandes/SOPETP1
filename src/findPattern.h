@@ -2,6 +2,8 @@
 #ifndef _FINDPATTERN_H_
 #define _FINDPATTERN_H_
 
-int findPatternInFile(const char *pattern, const char *filename, const char *options);
+#include <string>
+
+int findPatternInFile(std::string pattern, std::string filename, std::string options, bool dir);
 
 #endif /* _FINDPATTERN_H_*/

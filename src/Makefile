@@ -1,4 +1,4 @@
 # Makefile for simgrep
 
-simgrep: simgrep.c findpattern.c
-	gcc -o simgrep -Wall simgrep.c findpattern.c
+simgrep: simgrep.cpp findpattern.cpp
+	g++ -o simgrep -Wall simgrep.cpp findpattern.cpp -std=c++11
