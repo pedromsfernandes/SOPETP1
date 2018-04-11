@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
     string filedir;
 
     int i = 1;
-    int j = 0;
+    int j = -1;
 
     struct sigaction action;
     action.sa_handler = sigint_handler;
@@ -149,7 +150,10 @@ int main(int argc, char *argv[])
     for (; i < argc; i++)
     {
         if (argv[i][0] == '-')
+        {
             options.append(1, argv[i][1]);
+            j++;
+        }
 
         else
         {
@@ -158,7 +162,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        if (options[j] == 'r')
+        if (hasOption(options, 'r'))
             recursive = true;
         else if (!validOption(options[j]))
         {
@@ -175,7 +179,11 @@ int main(int argc, char *argv[])
         filedir = string(argv[i]);
         bool fileordir = isFileorDir(filedir.c_str());
         if (fileordir)
+        {
             hasdir = true;
+            if (filedir.back() != '/')
+                filedir.append(1, '/');
+        }
 
         else if (!fileordir)
             hasfile = true;
@@ -207,7 +215,7 @@ int main(int argc, char *argv[])
         }
     }
     else
-        return findPatternInFile(pattern, "", options, false);
+        return findPatternInFile(pattern, "stdin", options, false);
 
     return 0;
 }

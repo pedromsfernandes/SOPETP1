@@ -62,7 +62,7 @@ string toLowerCase(const string str)
 vector<string> decompString(string str)
 {
     vector<string> decomp;
-    const string delim = " ,.!-?\n";
+    const string delim = " ,.!-?:\n";
     size_t pos1 = 0;
     size_t pos2 = 0;
 
@@ -202,7 +202,8 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
     bool hasI = hasOption(options, 'i');
     bool hasW = hasOption(options, 'w');
 
-    vector<string> lines = filename == "" ? readCin() : readFile(filename);
+    vector<string> lines = filename == "stdin" ? readCin() : readFile(filename);
+
     if (hasL)
     {
         if (hasI && hasW)
@@ -284,7 +285,6 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
         else if (hasI)
         {
             lines = findPatternIgnore(pattern, lines, NULL);
-            pattern = toLowerCase(pattern);
         }
         else if (hasW)
         {
