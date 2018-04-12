@@ -26,8 +26,11 @@ void logCommand(char *argv[])
 {
     ofstream log(getenv(LOGFILENAME), ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
+
     log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0') << to_string(getpid()) << " - " << parseCommand(argv) << endl;
+    log << inst << " - " << setw(8) << setfill('0');
+    log << to_string(getpid()) << " - " << parseCommand(argv) << endl;
+
     log.close();
 }
 
@@ -36,29 +39,34 @@ string getLogFileName()
     string input;
     cout << "Please insert the logfile name: ";
     getline(cin, input);
+    int size = input.size();
 
-    if (input.find(".txt") == string::npos)
+    if (size <= 4 || input.substr(size-4, 4) != ".txt")
         input += ".txt";
 
     return input;
 }
 
-void logRead(string filename)
+void logRead(string filename, const char* logfile)
 {
-    ofstream log(getenv(LOGFILENAME), ios::app);
+    ofstream log(logfile, ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
+
     log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0') << to_string(getpid()) << " - OPENNED " << filename << endl;
+    log << inst << " - " << setw(8) << setfill('0');
+    log << to_string(getpid()) << " - OPENNED " << filename << endl;
 
     log.close();
 }
 
-void logClose(string filename)
+void logClose(string filename, const char* logfile)
 {
-    ofstream log(getenv(LOGFILENAME), ios::app);
+    ofstream log(logfile, ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
+
     log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0') << to_string(getpid()) << " - CLOSED " << filename << endl;
+    log << inst << " - " << setw(8) << setfill('0');
+    log << to_string(getpid()) << " - CLOSED " << filename << endl;
 
     log.close();
 }
@@ -69,7 +77,8 @@ void logUSR1()
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
 
     log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0') << to_string(getpid()) << "SIGNAL USR1" << endl;
+    log << inst << " - " << setw(8) << setfill('0');
+    log << to_string(getpid()) << "SIGNAL USR1" << endl;
 
     log.close();
 }
@@ -80,8 +89,9 @@ void logUSR2(int dest)
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
 
     log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0') << to_string(getpid()) << "SIGNAL USR2 to "
-        << setw(8) << setfill('0') << to_string(dest) << endl;
+    log << inst << " - " << setw(8) << setfill('0');
+    log << to_string(getpid()) << "SIGNAL USR2 to ";
+    log << setw(8) << setfill('0') << to_string(dest) << endl;
 
     log.close();
 }

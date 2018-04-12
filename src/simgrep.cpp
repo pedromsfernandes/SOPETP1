@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include "macros.h"
 #include "findPattern.h"
+#include "log.h"
 #include <dirent.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -79,7 +80,7 @@ void fileNotFound(string filedir)
     cout << "simgrep: File " << filedir << " not found!" << endl;
 }
 
-void sweepDir(string pattern, string dirName, string options, bool isRec)
+void sweepDir(string pattern, string dirName, string options, bool isRec, const char* logfile)
 {
     vector<string> filesInDir;
     DIR *d;
@@ -102,7 +103,7 @@ void sweepDir(string pattern, string dirName, string options, bool isRec)
                     int pid = fork();
                     if (pid == 0)
                     {
-                        sweepDir(pattern, dirName + dir->d_name + '/', options, isRec);
+                        sweepDir(pattern, dirName + dir->d_name + '/', options, isRec, logfile);
                         exit(0);
                     }
                 }
@@ -121,7 +122,7 @@ void sweepDir(string pattern, string dirName, string options, bool isRec)
     unsigned int size = filesInDir.size();
     for (unsigned int j = 0; j < size; j++)
     {
-        findPatternInFile(pattern, filesInDir[j], options, true);
+        findPatternInFile(pattern, filesInDir[j], options, true, logfile);
     }
 
     int status;
@@ -222,10 +223,15 @@ int main(int argc, char *argv[])
             return 2;
         }
     }
+    
+    string log = getLogFileName();
+    setenv(LOGFILENAME, log.c_str(), 1);
+
+    logCommand(argv);
 
     if (hasfile)
     {
-        return findPatternInFile(pattern, filedir, options, false);
+        return findPatternInFile(pattern, filedir, options, false, log.c_str());
     }
     else if (hasdir)
     {
@@ -244,7 +250,7 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-            sweepDir(pattern, filedir, options, recursive);
+            sweepDir(pattern, filedir, options, recursive, log.c_str());
             exit(0);
         }
         else
@@ -254,7 +260,7 @@ int main(int argc, char *argv[])
         }
     }
     else
-        return findPatternInFile(pattern, "stdin", options, false);
+        return findPatternInFile(pattern, "stdin", options, false, log.c_str());
 
     return 0;
 }

@@ -1,8 +1,8 @@
 #include <string>
 
-void logRead(std::string filename);
+void logRead(std::string filename, const char* logfile);
 
-void logClose(std::string filename);
+void logClose(std::string filename, const char* logfile);
 
 std::string getLogFileName();
 

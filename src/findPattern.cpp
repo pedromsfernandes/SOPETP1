@@ -7,12 +7,16 @@
 #include <ctype.h>
 #include "macros.h"
 #include "findPattern.h"
+#include "log.h"
+
 
 using namespace std;
 
-vector<string> readFile(string filename)
+vector<string> readFile(string filename, const char* logfile)
 {
     ifstream read(filename);
+
+    logRead(filename,logfile);
 
     string line;
     vector<string> lines;
@@ -30,10 +34,12 @@ vector<string> readFile(string filename)
     return lines;
 }
 
-vector<string> readCin()
+vector<string> readCin(const char* logfile)
 {
     string line;
     vector<string> lines;
+
+    logRead("stdin", logfile);
 
     while (!cin.eof())
     {
@@ -194,7 +200,7 @@ vector<string> prependFileName(const vector<string> &lines, string fileName)
     return prepend;
 }
 
-int findPatternInFile(string pattern, string filename, string options, bool dir)
+int findPatternInFile(string pattern, string filename, string options, bool dir, const char* logfile)
 {
     bool hasL = hasOption(options, 'l');
     bool hasC = hasOption(options, 'c');
@@ -202,7 +208,7 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
     bool hasI = hasOption(options, 'i');
     bool hasW = hasOption(options, 'w');
 
-    vector<string> lines = filename == "stdin" ? readCin() : readFile(filename);
+    vector<string> lines = filename == "stdin" ? readCin(logfile) : readFile(filename, logfile);
 
     if (hasL)
     {
@@ -215,18 +221,13 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
 
             if (hasPatternIgnore && hasPatternWord)
                 cout << filename << endl;
-
-            return 0;
         }
-
         else if (hasI)
         {
             bool hasPatternIgnore = false;
             findPatternIgnore(pattern, lines, &hasPatternIgnore);
             if (hasPatternIgnore)
                 cout << filename << endl;
-
-            return 0;
         }
 
         else if (hasW)
@@ -235,8 +236,6 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
             findPatternWord(pattern, lines, &hasPatternWord);
             if (hasPatternWord)
                 cout << filename << endl;
-
-            return 0;
         }
         else
         {
@@ -245,8 +244,6 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
             if (hasPattern)
                 cout << filename << endl;
         }
-
-        return 0;
     }
     else if (hasC)
     {
@@ -324,6 +321,8 @@ int findPatternInFile(string pattern, string filename, string options, bool dir)
             lines = prependFileName(lines, filename);
         printLines(lines);
     }
+
+    logClose(filename, logfile);
 
     return 0;
 }
