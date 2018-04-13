@@ -20,4 +20,6 @@ void logSignal(int dest, std::string signal);
 
 void logSignal(std::string signal);
 
+void openLog();
+
 #endif /* _LOG_H_ */

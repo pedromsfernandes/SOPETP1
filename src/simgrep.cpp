@@ -109,7 +109,9 @@ void sweepDir(string pattern, string dirName, string options, bool isRec)
 int main(int argc, char *argv[])
 {
     startTime();
-    proglog.open(string(getenv(LOGFILENAME)), ios::app);
+
+    openLog();
+
     logCommand(argv);
 
     if (argc < 2 || argv[argc - 1][0] == '-')

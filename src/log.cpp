@@ -61,46 +61,75 @@ string parseCommand(char *argv[])
 
 void logCommand(char *argv[])
 {
-    unsigned long long tempo = getTime();
+    if (proglog.is_open())
+    {
+        unsigned long long tempo = getTime();
 
-    proglog << fixed << setprecision(2);
-    proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
-    proglog << to_string(getpid()) << " - " << parseCommand(argv) << endl;
+        proglog << fixed << setprecision(2);
+        proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
+        proglog << to_string(getpid()) << " - " << parseCommand(argv) << endl;
+    }
 }
 
 void logRead(string filename)
 {
-    unsigned long long tempo = getTime();
+    if (proglog.is_open())
+    {
+        unsigned long long tempo = getTime();
 
-    proglog << fixed << setprecision(2);
-    proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
-    proglog << to_string(getpid()) << " - OPENED " << filename << endl;
+        proglog << fixed << setprecision(2);
+        proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
+        proglog << to_string(getpid()) << " - OPENED " << filename << endl;
+    }
 }
 
 void logClose(string filename)
 {
-    unsigned long long tempo = getTime();
+    if (proglog.is_open())
+    {
+        unsigned long long tempo = getTime();
 
-    proglog << fixed << setprecision(2);
-    proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
-    proglog << to_string(getpid()) << " - CLOSED " << filename << endl;
+        proglog << fixed << setprecision(2);
+        proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
+        proglog << to_string(getpid()) << " - CLOSED " << filename << endl;
+    }
 }
 
 void logSignal(int dest, string signal)
 {
-    unsigned long long tempo = getTime();
+    if (proglog.is_open())
+    {
+        unsigned long long tempo = getTime();
 
-    proglog << fixed << setprecision(2);
-    proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
-    proglog << to_string(getpid()) << " - SIGNAL " << signal << " to ";
-    proglog << to_string(dest) << endl;
+        proglog << fixed << setprecision(2);
+        proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
+        proglog << to_string(getpid()) << " - SIGNAL " << signal << " to ";
+        proglog << to_string(dest) << endl;
+    }
 }
 
 void logSignal(string signal)
 {
-    unsigned long long tempo = getTime();
+    if (proglog.is_open())
+    {
+        unsigned long long tempo = getTime();
 
-    proglog << fixed << setprecision(2);
-    proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
-    proglog << to_string(getpid()) << " - SIGNAL " << signal << endl;
+        proglog << fixed << setprecision(2);
+        proglog << tempo / 100.0 << " - " << setw(8) << setfill('0');
+        proglog << to_string(getpid()) << " - SIGNAL " << signal << endl;
+    }
+}
+
+void openLog()
+{
+    string logfilename = getenv(LOGFILENAME) == NULL ? "" : getenv(LOGFILENAME);
+    if (logfilename == "")
+    {
+        string input;
+        cout << "No logfile found. No logs will be recorded." << endl;
+        cout << "Press any key to continue." << endl;
+        getline(cin, input);
+    }
+    else
+        proglog.open(logfilename, ios::app);
 }
