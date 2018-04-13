@@ -106,11 +106,9 @@ void sweepDir(string pattern, string dirName, string options, bool isRec)
     }
 }
 
-int main(int argc, char *argv[], char *envp[])
+int main(int argc, char *argv[])
 {
     startTime();
-    string logfile = getLogFileName();
-    setenv(LOGFILENAME, logfile.c_str(), 1);
     proglog.open(string(getenv(LOGFILENAME)), ios::app);
     logCommand(argv);
 

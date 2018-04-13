@@ -68,19 +68,6 @@ void logCommand(char *argv[])
     proglog << to_string(getpid()) << " - " << parseCommand(argv) << endl;
 }
 
-string getLogFileName()
-{
-    string input;
-    cout << "Please insert the logfile name: ";
-    getline(cin, input);
-    int size = input.size();
-
-    if (size <= 4 || input.substr(size - 4, 4) != ".txt")
-        input += ".txt";
-
-    return input;
-}
-
 void logRead(string filename)
 {
     unsigned long long tempo = getTime();

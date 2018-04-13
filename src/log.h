@@ -12,8 +12,6 @@ void logRead(std::string filename);
 
 void logClose(std::string filename);
 
-std::string getLogFileName();
-
 void logCommand(char *argv[]);
 
 std::string parseCommand(char *argv[]);
