@@ -14,7 +14,7 @@ void setProcessGroup()
 
 void sigint_handler(int sig)
 {
-    kill(-processGroup, SIGUSR1);
+    kill(-processGroup, SIGTSTP);
     string answer = "";
 
     while (!(answer == "Y" || answer == "y" || answer == "N" || answer == "n"))
@@ -23,18 +23,17 @@ void sigint_handler(int sig)
 
         getline(cin, answer);
         if (answer == "Y" || answer == "y")
+        {
             kill(-processGroup, SIGTERM);
+        }
         else if (answer == "N" || answer == "n")
-            kill(-processGroup, SIGUSR2);
+        {
+            kill(-processGroup, SIGCONT);
+        }
     }
 }
 
-void sigusr1_handler(int sig)
-{
-    pause();
-}
-
-void nothing(int sig)
+void nothing(int signo)
 {
 }
 
@@ -53,18 +52,9 @@ void installParentHandlers()
     action.sa_handler = nothing;
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
-    if (sigaction(SIGUSR1, &action, NULL) < 0)
+    if (sigaction(SIGTSTP, &action, NULL) < 0)
     {
-        cerr << "Couldn't install SIGUSR1 handler\n";
-        exit(1);
-    }
-
-    action.sa_handler = nothing;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGUSR2, &action, NULL) < 0)
-    {
-        cerr << "Couldn't install SIGUSR2 handler\n";
+        cerr << "Couldn't install SIGTSTP handler\n";
         exit(1);
     }
 
@@ -74,6 +64,15 @@ void installParentHandlers()
     if (sigaction(SIGTERM, &action, NULL) < 0)
     {
         cerr << "Couldn't install SIGTERM handler\n";
+        exit(1);
+    }
+
+    action.sa_handler = nothing;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    if (sigaction(SIGCONT, &action, NULL) < 0)
+    {
+        cerr << "Couldn't install SIGCONT handler\n";
         exit(1);
     }
 }
@@ -90,23 +89,7 @@ void installChildrenHandlers()
         exit(1);
     }
 
-    action.sa_handler = sigusr1_handler;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGUSR1, &action, NULL) < 0)
-    {
-        cerr << "Couldn't install SIGUSR1 handler\n";
-        exit(1);
-    }
-
-    action.sa_handler = nothing;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGUSR2, &action, NULL) < 0)
-    {
-        cerr << "Couldn't install SIGUSR2 handler\n";
-        exit(1);
-    }
-
+    signal(SIGTSTP, SIG_DFL);
     signal(SIGTERM, SIG_DFL);
+    signal(SIGCONT, SIG_DFL);
 }
