@@ -3,7 +3,7 @@
 
 #include <string>
 
-int findPatternInFile(std::string pattern, std::string filename, std::string options, bool dir, const char *logfile);
+int findPatternInFile(std::string pattern, std::string filename, std::string options, bool dir);
 
 bool hasOption(std::string options, const char option);
 

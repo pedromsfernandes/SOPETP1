@@ -9,14 +9,13 @@
 #include "findPattern.h"
 #include "log.h"
 
-
 using namespace std;
 
-vector<string> readFile(string filename, const char* logfile)
+vector<string> readFile(string filename)
 {
     ifstream read(filename);
 
-    logRead(filename,logfile);
+    logRead(filename);
 
     string line;
     vector<string> lines;
@@ -34,12 +33,12 @@ vector<string> readFile(string filename, const char* logfile)
     return lines;
 }
 
-vector<string> readCin(const char* logfile)
+vector<string> readCin()
 {
     string line;
     vector<string> lines;
 
-    logRead("stdin", logfile);
+    logRead("stdin");
 
     while (!cin.eof())
     {
@@ -200,7 +199,7 @@ vector<string> prependFileName(const vector<string> &lines, string fileName)
     return prepend;
 }
 
-int findPatternInFile(string pattern, string filename, string options, bool dir, const char* logfile)
+int findPatternInFile(string pattern, string filename, string options, bool dir)
 {
     bool hasL = hasOption(options, 'l');
     bool hasC = hasOption(options, 'c');
@@ -208,7 +207,7 @@ int findPatternInFile(string pattern, string filename, string options, bool dir,
     bool hasI = hasOption(options, 'i');
     bool hasW = hasOption(options, 'w');
 
-    vector<string> lines = filename == "stdin" ? readCin(logfile) : readFile(filename, logfile);
+    vector<string> lines = filename == "stdin" ? readCin() : readFile(filename);
 
     if (hasL)
     {
@@ -322,7 +321,7 @@ int findPatternInFile(string pattern, string filename, string options, bool dir,
         printLines(lines);
     }
 
-    logClose(filename, logfile);
+    logClose(filename);
 
     return 0;
 }

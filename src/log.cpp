@@ -24,14 +24,11 @@ string parseCommand(char *argv[])
 
 void logCommand(char *argv[])
 {
-    ofstream log(getenv(LOGFILENAME), ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
 
-    log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0');
-    log << to_string(getpid()) << " - " << parseCommand(argv) << endl;
-
-    log.close();
+    proglog << fixed << setprecision(2);
+    proglog << inst << " - " << setw(8) << setfill('0');
+    proglog << to_string(getpid()) << " - " << parseCommand(argv) << endl;
 }
 
 string getLogFileName()
@@ -41,57 +38,36 @@ string getLogFileName()
     getline(cin, input);
     int size = input.size();
 
-    if (size <= 4 || input.substr(size-4, 4) != ".txt")
+    if (size <= 4 || input.substr(size - 4, 4) != ".txt")
         input += ".txt";
 
     return input;
 }
 
-void logRead(string filename, const char* logfile)
+void logRead(string filename)
 {
-    ofstream log(logfile, ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
 
-    log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0');
-    log << to_string(getpid()) << " - OPENNED " << filename << endl;
-
-    log.close();
+    proglog << fixed << setprecision(2);
+    proglog << inst << " - " << setw(8) << setfill('0');
+    proglog << to_string(getpid()) << " - OPENNED " << filename << endl;
 }
 
-void logClose(string filename, const char* logfile)
+void logClose(string filename)
 {
-    ofstream log(logfile, ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
 
-    log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0');
-    log << to_string(getpid()) << " - CLOSED " << filename << endl;
-
-    log.close();
+    proglog << fixed << setprecision(2);
+    proglog << inst << " - " << setw(8) << setfill('0');
+    proglog << to_string(getpid()) << " - CLOSED " << filename << endl;
 }
 
-void logUSR1()
+void logSignal(int dest, string signal)
 {
-    ofstream log(getenv(LOGFILENAME), ios::app);
     clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
 
-    log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0');
-    log << to_string(getpid()) << "SIGNAL USR1" << endl;
-
-    log.close();
-}
-
-void logUSR2(int dest)
-{
-    ofstream log(getenv(LOGFILENAME), ios::app);
-    clock_t inst = ((double)clock() / CLOCKS_PER_SEC) * 1000;
-
-    log << fixed << setprecision(2);
-    log << inst << " - " << setw(8) << setfill('0');
-    log << to_string(getpid()) << "SIGNAL USR2 to ";
-    log << setw(8) << setfill('0') << to_string(dest) << endl;
-
-    log.close();
+    proglog << fixed << setprecision(2);
+    proglog << inst << " - " << setw(8) << setfill('0');
+    proglog << to_string(getpid()) << " - SIGNAL " << signal << " to ";
+    proglog << to_string(dest) << endl;
 }

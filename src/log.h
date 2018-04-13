@@ -2,10 +2,13 @@
 #define _LOG_H_
 
 #include <string>
+#include <fstream>
 
-void logRead(std::string filename, const char *logfile);
+extern std::ofstream proglog;
 
-void logClose(std::string filename, const char *logfile);
+void logRead(std::string filename);
+
+void logClose(std::string filename);
 
 std::string getLogFileName();
 
@@ -13,8 +16,6 @@ void logCommand(char *argv[]);
 
 std::string parseCommand(char *argv[]);
 
-void logUSR1();
-
-void logUSR2(int dest);
+void logSignal(int dest, std::string signal);
 
 #endif /* _LOG_H_ */

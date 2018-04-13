@@ -16,6 +16,8 @@
 
 using namespace std;
 
+ofstream proglog;
+
 int invalidArgs()
 {
     cout << "simgrep: Invalid arguments!" << endl;
@@ -52,7 +54,7 @@ void fileNotFound(string filedir)
     cout << "simgrep: File " << filedir << " not found!" << endl;
 }
 
-void sweepDir(string pattern, string dirName, string options, bool isRec, const char *logfile)
+void sweepDir(string pattern, string dirName, string options, bool isRec)
 {
     vector<string> filesInDir;
     DIR *d;
@@ -75,7 +77,7 @@ void sweepDir(string pattern, string dirName, string options, bool isRec, const 
                     int pid = fork();
                     if (pid == 0)
                     {
-                        sweepDir(pattern, dirName + dir->d_name + '/', options, isRec, logfile);
+                        sweepDir(pattern, dirName + dir->d_name + '/', options, isRec);
                         exit(0);
                     }
                 }
@@ -94,7 +96,7 @@ void sweepDir(string pattern, string dirName, string options, bool isRec, const 
     unsigned int size = filesInDir.size();
     for (unsigned int j = 0; j < size; j++)
     {
-        findPatternInFile(pattern, filesInDir[j], options, true, logfile);
+        findPatternInFile(pattern, filesInDir[j], options, true);
     }
 
     int status;
@@ -168,14 +170,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    string log = getLogFileName();
-    setenv(LOGFILENAME, log.c_str(), 1);
-
+    string logfile = getLogFileName();
+    setenv(LOGFILENAME, logfile.c_str(), 1);
+    proglog.open(string(getenv(LOGFILENAME)), ios::app);
     logCommand(argv);
 
     if (hasfile)
     {
-        return findPatternInFile(pattern, filedir, options, false, log.c_str());
+        return findPatternInFile(pattern, filedir, options, false);
     }
     else if (hasdir)
     {
@@ -188,7 +190,7 @@ int main(int argc, char *argv[])
         if (pid == 0)
         {
             installChildrenHandlers();
-            sweepDir(pattern, filedir, options, recursive, log.c_str());
+            sweepDir(pattern, filedir, options, recursive);
             exit(0);
         }
         else
@@ -198,7 +200,7 @@ int main(int argc, char *argv[])
         }
     }
     else
-        return findPatternInFile(pattern, "stdin", options, false, log.c_str());
+        return findPatternInFile(pattern, "stdin", options, false);
 
     return 0;
 }

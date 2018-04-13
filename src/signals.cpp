@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <unistd.h>
+#include "log.h"
 
 using namespace std;
 
@@ -14,6 +15,7 @@ void setProcessGroup()
 
 void sigint_handler(int sig)
 {
+    logSignal(-processGroup, "SIGTSTP");
     kill(-processGroup, SIGTSTP);
     string answer = "";
 
@@ -24,10 +26,12 @@ void sigint_handler(int sig)
         getline(cin, answer);
         if (answer == "Y" || answer == "y")
         {
+            logSignal(-processGroup, "SIGTERM");
             kill(-processGroup, SIGTERM);
         }
         else if (answer == "N" || answer == "n")
         {
+            logSignal(-processGroup, "SIGCONT");
             kill(-processGroup, SIGCONT);
         }
     }
