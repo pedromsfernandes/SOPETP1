@@ -10,39 +10,11 @@
 #include "macros.h"
 #include "findPattern.h"
 #include "log.h"
+#include "signals.h"
 #include <dirent.h>
 #include <sys/wait.h>
-#include <signal.h>
 
 using namespace std;
-
-int processGroup;
-
-void sigint_handler(int sig)
-{
-    kill(-processGroup, SIGUSR1);
-    string answer = "";
-
-    while (!(answer == "Y" || answer == "y" || answer == "N" || answer == "n"))
-    {
-        cout << "\nAre you sure you want to terminate the program ? (Y / N) ";
-
-        getline(cin, answer);
-        if (answer == "Y" || answer == "y")
-            kill(-processGroup, SIGTERM);
-        else if (answer == "N" || answer == "n")
-            kill(-processGroup, SIGUSR2);
-    }
-}
-
-void sigusr1_handler(int sig)
-{
-    pause();
-}
-
-void nothing(int sig)
-{
-}
 
 int invalidArgs()
 {
@@ -80,7 +52,7 @@ void fileNotFound(string filedir)
     cout << "simgrep: File " << filedir << " not found!" << endl;
 }
 
-void sweepDir(string pattern, string dirName, string options, bool isRec, const char* logfile)
+void sweepDir(string pattern, string dirName, string options, bool isRec, const char *logfile)
 {
     vector<string> filesInDir;
     DIR *d;
@@ -148,34 +120,6 @@ int main(int argc, char *argv[])
     int i = 1;
     int j = -1;
 
-    struct sigaction action;
-    action.sa_handler = sigint_handler;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGINT, &action, NULL) < 0)
-    {
-        cerr << "Couldn't install SIGINT handler\n";
-        exit(1);
-    }
-
-    action.sa_handler = nothing;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGUSR1, &action, NULL) < 0)
-    {
-        cerr << "Couldn't install SIGUSR1 handler\n";
-        exit(1);
-    }
-
-    action.sa_handler = nothing;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if (sigaction(SIGUSR2, &action, NULL) < 0)
-    {
-        cerr << "Couldn't install SIGUSR2 handler\n";
-        exit(1);
-    }
-
     for (; i < argc; i++)
     {
         if (argv[i][0] == '-')
@@ -223,7 +167,7 @@ int main(int argc, char *argv[])
             return 2;
         }
     }
-    
+
     string log = getLogFileName();
     setenv(LOGFILENAME, log.c_str(), 1);
 
@@ -235,21 +179,15 @@ int main(int argc, char *argv[])
     }
     else if (hasdir)
     {
-        processGroup = getpgrp();
+        setProcessGroup();
+        installParentHandlers();
+
         int pid = fork();
         int status = 0;
 
         if (pid == 0)
         {
-            action.sa_handler = sigusr1_handler;
-            sigemptyset(&action.sa_mask);
-            action.sa_flags = 0;
-            if (sigaction(SIGUSR1, &action, NULL) < 0)
-            {
-                cerr << "Couldn't install SIGUSR1 handler\n";
-                exit(1);
-            }
-
+            installChildrenHandlers();
             sweepDir(pattern, filedir, options, recursive, log.c_str());
             exit(0);
         }
