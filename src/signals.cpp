@@ -6,7 +6,6 @@
 using namespace std;
 
 int processGroup;
-bool paused = false;
 
 void setProcessGroup()
 {
@@ -24,7 +23,7 @@ void sigint_handler(int sig)
 
         getline(cin, answer);
         if (answer == "Y" || answer == "y")
-            kill(-processGroup, SIGUSR1);
+            kill(-processGroup, SIGTERM);
         else if (answer == "N" || answer == "n")
             kill(-processGroup, SIGUSR2);
     }
@@ -32,12 +31,7 @@ void sigint_handler(int sig)
 
 void sigusr1_handler(int sig)
 {
-    if (!paused)
-    {
-        paused = true;
-        pause();
-        paused = false;
-    }
+    pause();
 }
 
 void nothing(int sig)
@@ -73,6 +67,15 @@ void installParentHandlers()
         cerr << "Couldn't install SIGUSR2 handler\n";
         exit(1);
     }
+
+    action.sa_handler = nothing;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    if (sigaction(SIGTERM, &action, NULL) < 0)
+    {
+        cerr << "Couldn't install SIGTERM handler\n";
+        exit(1);
+    }
 }
 
 void installChildrenHandlers()
@@ -104,4 +107,6 @@ void installChildrenHandlers()
         cerr << "Couldn't install SIGUSR2 handler\n";
         exit(1);
     }
+
+    signal(SIGTERM, SIG_DFL);
 }
