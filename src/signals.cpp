@@ -15,6 +15,7 @@ void setProcessGroup()
 
 void sigint_handler(int sig)
 {
+    logSignal("SIGINT");
     logSignal(-processGroup, "SIGTSTP");
     kill(-processGroup, SIGTSTP);
     string answer = "";

@@ -106,8 +106,14 @@ void sweepDir(string pattern, string dirName, string options, bool isRec)
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[], char *envp[])
 {
+    startTime();
+    string logfile = getLogFileName();
+    setenv(LOGFILENAME, logfile.c_str(), 1);
+    proglog.open(string(getenv(LOGFILENAME)), ios::app);
+    logCommand(argv);
+
     if (argc < 2 || argv[argc - 1][0] == '-')
         return invalidArgs();
 
@@ -170,11 +176,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    string logfile = getLogFileName();
-    setenv(LOGFILENAME, logfile.c_str(), 1);
-    proglog.open(string(getenv(LOGFILENAME)), ios::app);
-    logCommand(argv);
-
     if (hasfile)
     {
         return findPatternInFile(pattern, filedir, options, false);
@@ -183,7 +184,6 @@ int main(int argc, char *argv[])
     {
         setProcessGroup();
         installParentHandlers();
-
         int pid = fork();
         int status = 0;
 
