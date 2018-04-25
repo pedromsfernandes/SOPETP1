@@ -21,3 +21,6 @@ Where options can be one of the following:
 If no file or directory is specified, the pattern is looked for in the input stream, meaning the input text has to be sent through the terminal.
 ***
 More specifications can be found [here](enunciado.pdf) (in portuguese).
+
+## Authors
+This project was done in colaboration with [Bruno Sousa](https://github.com/Rekicho) and [Francisco Filipe](https://github.com/CiscoFrisco).
